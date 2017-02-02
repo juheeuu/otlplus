@@ -5,6 +5,7 @@ from apps.session.models import UserProfile
 from apps.timetable.models import TimeTable
 from django.contrib.auth.models import User
 
+from apps.subject.models import Lecture, ClassTime, ExamTime
 # Django modules
 from django.core.exceptions import *
 from django.http import *
@@ -22,6 +23,42 @@ import datetime
 import httplib2
 # Misc
 import os
+import json
+
+# HELPER_FUNCTION_FOR_JSON
+def time_to_int(some_time):
+	hour, minute = map(int, str(some_time).split(':'))
+	return hour * 60 + minute
+
+def makelec_json(some_lec):
+	pass
+
+def dragresult_json(request):
+#request.method will be POST (GET은 그냥 테스트용으로...)
+    year = int(request.GET['year'])
+    semester = int(request.GET['semester'])
+    start_time = int(request.GET['start_block']) * 30 + 480
+    end_time = int(request.GET['end_block']) * 30 + 480
+    start_day = int(request.GET['start_day'])
+    end_day = int(request.GET['end_day'])
+    if start_time > end_time:
+	    start_time, end_time = end_time, start_time
+	end_time += 1
+	if start_day > end_day:
+	    start_day, end_day = end_day, start_day
+	ClassTimeList = ClassTime.objects.all()
+	IncludedLecture = []
+	for each_ClTime in ClassTimeList:
+		target_lecture = each_ClTime.lecture
+		if target_lecture in IncludedLecture: continue
+		if target_lecture.year == year and target_lecture.semester == semester:
+		    if start_time <= time_to_int(each_ClTime.begin) and time_to_int(each_ClTime.end) <= end_time:
+			    if start_day <= each_ClTime.day and each_ClTime.day <= end_day:
+				    IncludedLecture.append(target_lecture)
+	context = []
+	for each_target_lecture in IncludedLecture:
+	    context.append(makelec_json(each_target_lecture))
+	return JsonResponse(context)
 
 
 def test(request):

@@ -17,9 +17,12 @@ class Comment(models.Model):
     writer_label = models.CharField(max_length=200, default=u"무학과 넙죽이")
     written_datetime = models.DateTimeField(auto_now=True, db_index=True)
     like = models.IntegerField(default=0)
-
+    
+    is_deleted = models.IntegerField(default=0)
+    # 0 : not deleted, 1 : deleted_by_user, others : deleted_by_admin
+    # 2 : 부적절한 언어 사용 # 3 : ... # 저에게 의견을 주세요ㅠ
     def __unicode__(self):
-	return u"%s(%s)"%(self.lecture,self.writer)
+        return u"%s(%s)"%(self.lecture,self.writer)
 
     @classmethod
     def u_create(cls, course, lecture, comment, grade, load, speech, writer):
