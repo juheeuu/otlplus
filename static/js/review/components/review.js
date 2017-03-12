@@ -11,7 +11,10 @@ $(".review .comment").click(function(){
         window.location="/review/result/comment/"+comment_id;
     }
 });
-$(".review .like-button").click(function(){
+
+var like_button = $(".review .like-button");
+
+like_button.click(function(){
     $.ajax({
         type: "POST",
         url: "/review/like/",
@@ -43,3 +46,21 @@ $(".review .like-button").click(function(){
         }
     });
 });
+
+$(".review .declaration-button").click(function() {
+  if (confirm("정말로 신고하겠습니까?")) {
+    $.ajax({
+      type: "POST",
+      url: "/review/like/",
+      data: {'commentid': like_button.attr('id'), 'csrfmiddlewaretoken': $("#csrf_token").val()},
+      dataType:'json',
+      success: function(response) {
+        data = JSON.parse(response);
+        if (data.success) {
+          alert('정상적으로 신고되었습니다');
+        } else {
+          alert('서버 오류가 발생했습니다');
+        }
+      }
+    });
+  }

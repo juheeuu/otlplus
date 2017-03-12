@@ -39,7 +39,7 @@
 <script>
 var auto_source = "{{auto_source}}"
 var auto_source = auto_source.split(',')
-$(document).ready(function(){     
+$(document).ready(function(){
     $( "#keyword" ).autocomplete({
         source: auto_source,
         focus: function(){
@@ -67,7 +67,7 @@ var loadItems = function() {
     var url = window.location.href +"json/"+pageNum.toString()
     $.ajax({
         type:"GET",
-        url: url, 
+        url: url,
         success: function(responseData) {
             var data = JSON.parse(responseData);
             hasNextPage=data.hasNext;
@@ -203,7 +203,7 @@ html.push('<div class="score_table text-left col-xs-24" style="margin-right:-40p
                 html.push('</div>')
                 html.push('</span><div class="col-xs-24 button-box-review"><a class="declaration-button not-active"><i class="fa fa-exclamation-circle"></i> 신고하기</a><a class="')
                         if(result.already_up){
-                            html.push('declaration-button not-active ')
+                            html.push('declaration-button ')
                             html.push(result.id)
                             html.push('" id="')
                             html.push(result.id)
@@ -220,7 +220,7 @@ html.push('<div class="score_table text-left col-xs-24" style="margin-right:-40p
 
              });
             $("#datacall").before(html.join(""));
-        }, 
+        },
         error: function(){
             hasNextPage=false;
         },
@@ -233,7 +233,7 @@ html.push('<div class="score_table text-left col-xs-24" style="margin-right:-40p
 
         }
     });
-};   
+};
 </script>
 
 {% endblock %}
@@ -274,7 +274,7 @@ html.push('<div class="score_table text-left col-xs-24" style="margin-right:-40p
       {% if expectations %}
         {% include 'review/components/expect.html' with lectures=expectations %}
       {% endif %}
-   
+
       {% if result.type == "course" %}
         {% include 'review/components/course.html' %}
       {% endif %}
@@ -289,7 +289,7 @@ html.push('<div class="score_table text-left col-xs-24" style="margin-right:-40p
         </div>
       {% endif %}
 
-    
+
 
       {% for result in results %}
         {% include 'review/components/review.html' %}

@@ -13,6 +13,7 @@ from math import exp
 from itertools import groupby
 from django.core.paginator import Paginator, InvalidPage
 from django.core import serializers
+from django.core.mail import mail_admins
 import json
 #testend
 import random
@@ -543,7 +544,7 @@ def ReviewDelete(request):
     user_profile = UserProfile.objects.get(user=user)
 
     lecture = user_profile.take_lecture_list.get(id=request.POST['lectureid'])
-    target_comment = user_profile.comment_set.get(lecture=lecture);
+    target_comment = user_profile.comment_set.get(lecture=lecture)
     target_comment.u_delete()
     return HttpResponseRedirect('/review/insert/'+str(request.POST['lectureid'])+'/'+str(request.POST['semester']))
 #@login_required
@@ -558,7 +559,7 @@ def ReviewLike(request):
         if request.method == 'POST':
             user = request.user
             user_profile = UserProfile.objects.get(user=user)
-            target_review = Comment.objects.get(id=request.POST['commentid']);
+            target_review = Comment.objects.get(id=request.POST['commentid'])
             if CommentVote.objects.filter(comment = target_review, userprofile = user_profile).exists():
                 already_up = True
             else:
@@ -566,6 +567,31 @@ def ReviewLike(request):
                 likes_count = target_review.like
     ctx = {'likes_count': likes_count, 'already_up': already_up, 'is_login':is_login, 'id': request.POST['commentid']}
     return JsonResponse(json.dumps(ctx),safe=False)
+
+
+def ReviewReport(request):
+    '''Report a given review to the system admins'''
+    if reqeust.method != 'POST' or 'commentid' not in request.POST:
+        return JsonResponse({ 'success': False, 'reason': 'Bad Reqeust' })
+    if not request.user.is_authenticated():
+        return JsonResponse({ 'success': False, 'reason': 'Forbidden' })
+
+    user_profile = UserProfile.objects.get(user=user)
+    comment_id = request.POST['commentid']
+
+    try:
+        reported_review = Comment.objects.get(id=comment_id)
+        subject = "[OTLPlus] Report on comment id %d." % comment_id
+        message = "내용: %s\n 자성자 %s\n 학번 %s\n" % \
+                   (reported_review.comment, reported_review.writer.user.name,
+                    reported_review.writer.student_id)
+
+    except DoesNotExist:
+        return JsonResponse({ 'success': False, 'reason': 'Bad Reqeust' })
+
+    mail_admins(subject=subject, message=message)
+    return JsonResponse({ 'success': True })
+
 
 #ReviewWritingPage#################################################################################################
 @login_required(login_url='/session/login/')
@@ -844,4 +870,3 @@ def dictionary(request, course_code):
     if len(courses)>0:
         return HttpResponseRedirect('/review/result/course/'+str(courses[0].id))
     raise Http404
-
